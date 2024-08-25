@@ -85,7 +85,7 @@ class CameraApp(QMainWindow):
         ret, frame = self.cap.read()
         if ret:
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            rgb_frame = cv2.flip(rgb_frame, 1)
+            # rgb_frame = cv2.flip(rgb_frame, 1)
 
             # Convert the frame to QImage
             h, w, ch = rgb_frame.shape
@@ -136,7 +136,8 @@ class CameraApp(QMainWindow):
 
     
     def validate_pos(self, pos):
-        return self.video_label.rect().contains(pos)
+        is_cam = self.btn_came.text() == "Stop"
+        return is_cam and self.video_label.rect().contains(pos)
     
     def update_point(self, pos):
         vy = self.video_label.pos().y()
