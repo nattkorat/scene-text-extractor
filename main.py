@@ -1,8 +1,10 @@
 import sys
 import cv2
+import requests
 from PyQt5.QtCore import QTimer, Qt, QRect, QPoint
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
 from PyQt5.QtWidgets import *
+
 
 import style
 
@@ -118,8 +120,12 @@ class CameraApp(QMainWindow):
         if self.validate_pos(event.pos()):
             print(f"Mouse release {event.pos()}")
             self.drawBoundingBox()
-            
             self.getSelectedArea()
+            result = self.get_inf()
+            if result:
+                text = result.get("result", None)
+                self.result_text.setText(text)
+
 
     def drawBoundingBox(self):
         if self.btn_came.text() == "Stop":
@@ -149,6 +155,7 @@ class CameraApp(QMainWindow):
     
     def getSelectedArea(self):
         self.cropped_img = self.pixmapimage.copy(self.getBoundingBox())
+        self.cropped_img.save("temp.png", "PNG")
         w, h = self.select_img.width(), self.select_img.height()
         self.cropped_img = self.cropped_img.scaled(w, h, Qt.KeepAspectRatio)
 
@@ -156,6 +163,22 @@ class CameraApp(QMainWindow):
     
     def getBoundingBox(self):
         return QRect(self.start_pos, self.end_pos)
+    
+    def get_inf(self):
+        try:
+            response = requests.post(
+                url=" http://10.5.5.50:5000/api/ocr/eng",
+                files={
+                        "media": open("temp.png", "rb")
+                },
+                timeout=5
+            )
+            return response.json()
+        
+        except Exception as error:
+            return None
+        
+
     
     
 
